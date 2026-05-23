@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{project}} - 测试报告</title>
+<style>
+/* ====== RESET & BASE ====== */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  background:#0a0e27;
+  color:#e0e6f0;
+  line-height:1.6;
+  min-height:100vh;
+}
+
+/* ====== SCI-FI GLOW BACKGROUND ====== */
+body::before{
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(0,100,255,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(120,0,255,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0,212,255,.04) 0%, transparent 60%);
+}
+
+/* ====== SUMMARY HEADER ====== */
+.summary{
+  background:linear-gradient(135deg,#0d1b3e 0%,#1a1040 50%,#0d1b3e 100%);
+  border-bottom:1px solid rgba(0,212,255,.2);
+  padding:36px 40px 28px;
+  position:relative;
+  z-index:10;
+}
+.summary::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,.6),rgba(120,0,255,.4),transparent);
+}
+.sum-title{
+  font-size:26px;font-weight:700;
+  background:linear-gradient(90deg,#00d4ff,#b388ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:24px;letter-spacing:1px;
+}
+.sum-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;
+}
+.sum-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:18px 16px;
+  backdrop-filter:blur(8px);
+  transition:border-color .3s;
+}
+.sum-card:hover{border-color:rgba(0,212,255,.3)}
+.sum-card .lb{font-size:11px;color:#8892b0;text-transform:uppercase;letter-spacing:1px}
+.sum-card .vl{font-size:30px;font-weight:800;margin-top:6px;font-family:"SF Mono","Fira Code",monospace}
+.sum-card .vl.g{color:#00e676;text-shadow:0 0 20px rgba(0,230,118,.3)}
+.sum-card .vl.r{color:#ff5252;text-shadow:0 0 20px rgba(255,82,82,.3)}
+.sum-card .vl.y{color:#ffab40;text-shadow:0 0 20px rgba(255,171,64,.3)}
+.sum-card .vl.cy{color:#00d4ff;text-shadow:0 0 20px rgba(0,212,255,.3)}
+.sum-card .sub{font-size:12px;color:#5a6380;margin-top:2px}
+
+/* progress */
+.pbar{width:100%;height:6px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:22px;overflow:hidden;display:flex}
+.pbar .sp{background:linear-gradient(90deg,#00e676,#00c853)}
+.pbar .sf{background:linear-gradient(90deg,#ff5252,#d50000)}
+.pbar .ss{background:#546e7a}
+
+.minfo{display:flex;flex-wrap:wrap;gap:20px;margin-top:18px;font-size:13px;color:#8892b0}
+.minfo .mi{display:flex;align-items:center;gap:6px}
+.minfo .mi .mk{color:#5a6380;font-weight:600}
+.minfo .mi .mv{color:#ccd6f6;font-family:"SF Mono",monospace;font-size:12px}
+
+/* ====== TOOLBAR ====== */
+.toolbar{
+  background:rgba(13,27,62,.95);
+  border-bottom:1px solid rgba(0,212,255,.12);
+  padding:10px 40px;display:flex;gap:10px;align-items:center;
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.toolbar button{
+  padding:6px 16px;border-radius:6px;
+  border:1px solid rgba(0,212,255,.2);
+  background:rgba(0,212,255,.06);
+  color:#8892b0;cursor:pointer;font-size:13px;
+  transition:all .25s;font-family:inherit;
+}
+.toolbar button:hover{background:rgba(0,212,255,.15);color:#ccd6f6;border-color:rgba(0,212,255,.4)}
+.toolbar button.active{
+  background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(120,0,255,.15));
+  color:#00d4ff;border-color:rgba(0,212,255,.5);
+  box-shadow:0 0 12px rgba(0,212,255,.15);
+}
+
+/* ====== DETAIL SECTION ====== */
+.detail-section{
+  padding:24px 0 40px;position:relative;z-index:1;
+}
+.detail-title{
+  font-size:18px;font-weight:700;color:#ccd6f6;margin-bottom:16px;padding:0 40px;
+  display:flex;align-items:center;gap:8px;
+}
+.detail-title::before{content:'';display:inline-block;width:4px;height:20px;border-radius:2px;background:linear-gradient(180deg,#b388ff,#ff5252)}
+
+/* ====== CASE ====== */
+.case{
+  margin:0 40px 12px;
+  background:rgba(13,27,62,.5);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;
+  overflow:hidden;
+  border-left:3px solid #00e676;
+  backdrop-filter:blur(6px);
+  transition:border-color .3s;
+}
+.case.fail{border-left-color:#ff5252}
+.case:hover{border-color:rgba(0,212,255,.2)}
+.case-hd{
+  display:flex;align-items:center;gap:12px;padding:14px 20px;
+  cursor:pointer;transition:background .2s;user-select:none;
+}
+.case-hd:hover{background:rgba(0,212,255,.05)}
+.ci-icon{font-size:18px}
+.ci-id{
+  font-family:"SF Mono","Fira Code",monospace;font-size:12px;
+  background:rgba(0,212,255,.1);padding:3px 10px;border-radius:4px;color:#00d4ff;
+}
+.ci-path{display:flex;align-items:center;gap:6px}
+.ci-nm{font-weight:600;font-size:15px;flex:1;color:#ccd6f6}
+.ci-pri{
+  font-size:11px;padding:3px 10px;border-radius:20px;
+  background:rgba(255,171,64,.12);color:#ffab40;font-weight:600;
+}
+.ci-stats{display:flex;gap:8px;font-size:13px}
+.cs{padding:3px 8px;border-radius:4px}
+.cs.ps{background:rgba(0,230,118,.1);color:#00e676}
+.cs.fs{background:rgba(255,82,82,.1);color:#ff5252}
+.cs.ss{background:rgba(84,110,122,.2);color:#90a4ae}
+.ci-tgl{font-size:12px;color:#5a6380;transition:transform .3s}
+.case.expanded .ci-tgl{transform:rotate(180deg)}
+.case-bd{display:none;padding:16px 20px;border-top:1px solid rgba(255,255,255,.04)}
+.case.expanded .case-bd{display:block}
+
+/* ====== SETUP SECTION (单接口前置步骤) ====== */
+.setup-section{
+  margin-bottom:16px;
+  padding-bottom:16px;
+  border-bottom:1px dashed rgba(0,212,255,.15);
+}
+.setup-label{
+  font-size:12px;font-weight:600;color:#5a6380;
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:10px;padding:4px 0;
+  display:flex;align-items:center;gap:6px;
+}
+.setup-label::before{
+  content:'';display:inline-block;width:3px;height:14px;border-radius:2px;
+  background:linear-gradient(180deg,#00d4ff,#5a6380);
+}
+
+/* ====== STEP ====== */
+.step{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:8px;margin-bottom:10px;
+  border-left:3px solid #00e676;
+  transition:border-color .2s;
+}
+.step.fail{border-left-color:#ff5252}
+.step.skip{border-left-color:#546e7a}
+
+/* 前置步骤特殊样式 */
+.step.setup-step{
+  border-left-color:#5a6380;
+  background:rgba(255,255,255,.01);
+  opacity:.85;
+}
+.step.setup-step:hover{opacity:1}
+.step.setup-step .snm{color:#8892b0}
+
+.step-hd{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  cursor:pointer;flex-wrap:wrap;transition:background .15s;user-select:none;
+}
+.step-hd:hover{background:rgba(0,212,255,.05)}
+.ssi{font-size:16px}
+.sno{font-size:12px;color:#5a6380;font-family:"SF Mono",monospace}
+.snm{font-weight:600;font-size:14px;color:#ccd6f6}
+.mb{
+  font-size:10px;padding:3px 10px;border-radius:4px;color:#fff;
+  font-weight:700;font-family:"SF Mono",monospace;letter-spacing:.5px;
+  text-shadow:0 0 8px rgba(0,0,0,.3);
+}
+.url{
+  font-size:11px;color:#5a6380;font-family:"SF Mono",monospace;
+  max-width:480px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.scenario-tag{
+  font-size:10px;padding:2px 8px;border-radius:10px;
+  background:rgba(120,0,255,.15);color:#b388ff;
+  font-weight:600;letter-spacing:.3px;
+  border:1px solid rgba(120,0,255,.2);
+}
+.scb{font-weight:700;font-size:14px}
+.stgl{font-size:12px;color:#5a6380;transition:transform .3s;margin-left:auto}
+.step.expanded .stgl{transform:rotate(180deg)}
+.step-bd{display:none;padding:14px}
+.step.expanded .step-bd{display:block}
+
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.twocol{grid-template-columns:1fr}}
+
+.sec{margin-bottom:12px}
+.stitle{font-size:12px;font-weight:600;color:#8892b0;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.5px}
+.cb{
+  background:#060a1a;color:#e0e6f0;padding:14px;border-radius:8px;
+  border:1px solid rgba(0,212,255,.08);
+  font-family:"SF Mono","Fira Code","Consolas",monospace;
+  font-size:12px;line-height:1.6;overflow:auto;
+  max-height:350px;white-space:pre-wrap;word-break:break-all;
+}
+.jk{color:#82aaff}.js{color:#c3e88d}.jn{color:#f78c6c}.jb{color:#c792ea}
+
+/* tables */
+.atbl{width:100%;border-collapse:collapse;font-size:13px}
+.atbl td{padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:#ccd6f6}
+.atbl tr:nth-child(even){background:rgba(255,255,255,.02)}
+.atbl .smart-row td{color:#b388ff;background:rgba(120,0,255,.04)}
+
+.vtbl{width:100%;border-collapse:collapse;font-size:13px}
+.vtbl td{padding:4px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#ccd6f6}
+.vn{font-family:"SF Mono",monospace;font-size:11px;background:rgba(120,0,255,.15);color:#b388ff;padding:2px 8px;border-radius:4px}
+
+.esec{border-left:3px solid #ff5252;padding-left:10px}
+.etxt{background:rgba(255,82,82,.08);color:#ff8a80;padding:10px 14px;border-radius:6px;font-family:"SF Mono",monospace;font-size:12px;border:1px solid rgba(255,82,82,.15)}
+
+.tgl{font-size:11px;color:#00d4ff;cursor:pointer;margin-left:8px;text-transform:uppercase;letter-spacing:.5px}
+.tgl:hover{text-decoration:underline}
+
+.footer{text-align:center;padding:40px;color:#2d3561;font-size:13px;position:relative;z-index:1}
+
+/* scroll */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,212,255,.2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,.4)}
+</style>
+</head>
+<body>
+
+<!-- Summary -->
+<div class="summary">
+  <div class="sum-title">⚡ {{project}} — 测试报告</div>
+  <div class="sum-grid">
+    <div class="sum-card"><div class="lb">通过步骤</div><div class="vl g">{{passed_steps}}</div></div>
+    <div class="sum-card"><div class="lb">失败步骤</div><div class="vl r">{{failed_steps}}</div></div>
+    <div class="sum-card"><div class="lb">跳过步骤</div><div class="vl y">{{skipped_steps}}</div></div>
+    <div class="sum-card"><div class="lb">通过率</div><div class="vl cy">{{pass_rate}}</div></div>
+    <div class="sum-card"><div class="lb">用例/接口通过</div><div class="vl cy">{{passed_cases}}/{{total_cases}}</div><div class="sub">失败 {{failed_cases}} 条</div></div>
+    <div class="sum-card"><div class="lb">总步骤</div><div class="vl cy">{{total_steps}}</div></div>
+  </div>
+  <div class="pbar">
+    <div class="sp" style="width:{{pass_pct}}%"></div>
+    <div class="sf" style="width:{{fail_pct}}%"></div>
+    <div class="ss" style="width:{{skip_pct}}%"></div>
+  </div>
+  <div class="minfo">
+    <div class="mi"><span class="mk">执行时间</span><span class="mv">{{started_at}}</span></div>
+    <div class="mi"><span class="mk">耗时</span><span class="mv">{{duration}}s</span></div>
+    <div class="mi"><span class="mk">Base URL</span><span class="mv">{{base_url}}</span></div>
+    <div class="mi"><span class="mk">测试账号</span><span class="mv">{{test_account}}</span></div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <button onclick="toggleAll(true)">📊 全部展开</button>
+  <button onclick="toggleAll(false)">📊 全部折叠</button>
+  <button onclick="filterCases('all')" class="active" id="btn-all">全部 ({{total_cases}})</button>
+  <button onclick="filterCases('pass')" id="btn-pass">✅ 通过 ({{passed_cases}})</button>
+  <button onclick="filterCases('fail')" id="btn-fail">❌ 失败 ({{failed_cases}})</button>
+</div>
+
+<!-- Detail -->
+<div class="detail-section">
+  <div class="detail-title">🔬 用例详情</div>
+  <div id="cases-container">{{cases_html}}</div>
+</div>
+
+<div class="footer">⚡ Generated by OpenClaw API Test Framework · {{generated_at}}</div>
+
+<script>
+function toggleCase(hd) { hd.parentElement.classList.toggle('expanded'); }
+function toggleStep(hd) { hd.parentElement.classList.toggle('expanded'); }
+
+function toggleAll(expand) {
+  document.querySelectorAll('.case').forEach(c => {
+    if (expand) c.classList.add('expanded');
+    else c.classList.remove('expanded');
+  });
+  document.querySelectorAll('.step').forEach(s => {
+    if (expand) s.classList.add('expanded');
+    else s.classList.remove('expanded');
+  });
+}
+
+function filterCases(type) {
+  document.querySelectorAll('.toolbar button').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + type).classList.add('active');
+  document.querySelectorAll('.case').forEach(c => {
+    if (type === 'all') { c.style.display = ''; }
+    else { c.style.display = c.dataset.status === type.toUpperCase() ? '' : 'none'; }
+  });
+}
+
+function toggleResp(el) {
+  const block = el.parentElement.querySelector('.cb');
+  if (!block) return;
+  if (block.style.display === 'none') {
+    block.style.display = '';
+    el.textContent = '收起';
+  } else {
+    block.style.display = 'none';
+    el.textContent = '展开';
+  }
+}
+</script>
+</body>
+</html>
